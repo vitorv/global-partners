@@ -1,0 +1,19 @@
+# Core PySpark (local execution)
+pyspark==3.5.1
+
+# JDBC driver connectivity (SQL Server)
+# The actual JAR is downloaded separately — see config.py for path
+pyodbc==5.1.0
+
+# Data validation & inspection
+pandas==2.2.2
+
+# Streamlit dashboard
+streamlit==1.35.0
+plotly==5.22.0
+
+# AWS SDK (for Phase B — S3/Glue deployment)
+boto3==1.34.107
+
+# Code quality
+flake8==7.0.0
