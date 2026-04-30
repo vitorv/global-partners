@@ -7,18 +7,22 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Load custom CSS
+with open("streamlit_app/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 # Use the new multipage navigation API (Streamlit >= 1.36.0)
 pg = st.navigation([
-    st.Page("pages/01_overview.py", title="Overview", icon="📈"),
-    st.Page("pages/02_customer_ltv.py", title="Customer LTV", icon="💰"),
-    st.Page("pages/03_rfm.py", title="RFM Segmentation", icon="🎯"),
-    st.Page("pages/04_sales_trends.py", title="Sales Trends", icon="📅"),
-    st.Page("pages/05_locations.py", title="Locations", icon="🏪"),
-    st.Page("pages/06_churn.py", title="Churn Analysis", icon="⚠️"),
+    st.Page("pages/01_customer_segmentation.py", title="Customer Segmentation"),
+    st.Page("pages/02_churn_risk.py", title="Churn Risk Indicators"),
+    st.Page("pages/03_sales_trends.py", title="Sales Trends & Seasonality"),
+    st.Page("pages/04_loyalty_impact.py", title="Loyalty Program Impact"),
+    st.Page("pages/05_location_performance.py", title="Location Performance"),
+    st.Page("pages/06_pricing_discounts.py", title="Pricing & Discounts"),
 ])
 
 st.sidebar.title("Global Partners")
 st.sidebar.markdown("---")
-st.sidebar.info("Use the navigation menu above to explore different analytics dashboards.")
+st.sidebar.caption("Analytics Dashboard — Step 6 Deliverables")
 
 pg.run()

@@ -54,3 +54,9 @@ def load_customer_rfm():
     df = pd.read_parquet(os.path.join(BASE_PATH, "fct_customer_rfm"))
     df["monetary"] = pd.to_numeric(df["monetary"], errors="coerce").fillna(0.0)
     return df
+
+@st.cache_data
+def load_dim_date():
+    df = pd.read_parquet(os.path.join(BASE_PATH, "dim_date"))
+    df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
+    return df
