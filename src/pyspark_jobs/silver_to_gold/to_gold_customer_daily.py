@@ -30,7 +30,10 @@ def run():
     fct_orders   = read_parquet_local(spark, get_path("gold") + "/fct_order_summary")
 
     # ── Build the date spine per customer ─────────────────────────────────────
-    # Cross-join customers with dates, filtered to each customer's active range
+    # Get the global max date in the dataset
+    max_date_row = dim_date.select(F.max("date_key").alias("max_date")).collect()[0]
+    global_max_date = max_date_row["max_date"]
+
     customers = dim_customer.select(
         "user_id", "is_loyalty", "first_order_date", "last_order_date"
     )
@@ -40,7 +43,7 @@ def run():
         .crossJoin(dim_date.select("date_key"))
         .filter(
             (F.col("date_key") >= F.col("first_order_date")) &
-            (F.col("date_key") <= F.col("last_order_date"))
+            (F.col("date_key") <= F.lit(global_max_date))
         )
     )
 

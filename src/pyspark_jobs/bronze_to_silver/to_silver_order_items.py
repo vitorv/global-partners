@@ -33,7 +33,29 @@ def run():
           .withColumn("item_quantity", F.col("item_quantity").cast(IntegerType()))
           .withColumn("line_item_revenue", (F.col("item_price").cast(DecimalType(10, 2)) * F.col("item_quantity").cast(IntegerType())).cast(DecimalType(10, 2)))
           .withColumn("is_loyalty", F.col("is_loyalty").cast(BooleanType()))
+          .withColumn(
+              "item_category",
+              F.when(F.col("item_category").contains("BBQ Plateshttps"), "BBQ Plates")
+               .when(F.col("item_category").contains("Drip Chttps"), "Drip Coffee")
+               .when(F.col("item_category").contains("Kid'shttps"), "Kids")
+               .when(F.col("item_category") == "Kid's", "Kids")
+               .when(F.col("item_category") == "Sqalads", "Salads")
+               .when(F.col("item_category") == "Bowls0", "Bowls")
+               .when(F.col("item_category").startswith("Sandwiches"), "Sandwiches")
+               .otherwise(F.col("item_category"))
+          )
     )
+
+    # Filter out test data
+    df_silver = df_silver.filter(F.col("item_category") != "Test Items")
+
+    # Filter out extreme outliers (likely developer testing)
+    df_silver = df_silver.filter(
+        (F.col("item_price") < 1000) & 
+        (F.col("item_quantity") < 100) & 
+        (F.col("line_item_revenue") < 2000)
+    )
+
 
     # We partition by order_date_partition (YYYY-MM-DD string) to be consistent with Bronze
     df_silver = df_silver.withColumn("order_date_partition", F.col("order_date").cast("string"))

@@ -1,0 +1,44 @@
+/* style.css - Dark mode theme overrides for Streamlit */
+
+/* KPI Metric Cards */
+div[data-testid="metric-container"] {
+    background-color: #1c2333;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+div[data-testid="metric-container"] label {
+    font-size: 1.1rem;
+    color: #a3a8b8;
+}
+
+div[data-testid="metric-container"] div[data-testid="stMetricValue"] {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+/* Sidebar Styling */
+section[data-testid="stSidebar"] {
+    background-color: #121826;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Base background */
+.stApp {
+    background-color: #0e1117;
+}
+
+/* Dataframe header styling */
+th {
+    background-color: #1c2333 !important;
+    color: #e2e8f0 !important;
+    font-weight: 600 !important;
+}
+
+/* Chart container styling to blend with dark mode */
+div.stPlotlyChart {
+    background-color: transparent !important;
+}
