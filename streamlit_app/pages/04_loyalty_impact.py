@@ -61,8 +61,10 @@ col_a, col_b = st.columns(2)
 
 with col_a:
     st.subheader("CLV Distribution by Loyalty Status")
-    # Filter out extreme outliers for readability
+    # Cap at 95th percentile so the distribution shape is readable
     plot_df = user_orders[user_orders["total_revenue"] > 0].copy()
+    cap = plot_df["total_revenue"].quantile(0.95)
+    plot_df = plot_df[plot_df["total_revenue"] <= cap]
     fig_hist = px.histogram(
         plot_df, x="total_revenue", color="loyalty_status",
         nbins=50, barmode="overlay", opacity=0.7,
@@ -71,6 +73,7 @@ with col_a:
     )
     fig_hist.update_layout(height=400)
     st.plotly_chart(fig_hist, use_container_width=True)
+    st.caption(f"_Showing customers up to the 95th percentile (≤ ${cap:,.0f}) for readability._")
 
 with col_b:
     st.subheader("Repeat Purchase Rate Comparison")
@@ -89,6 +92,24 @@ with col_b:
     fig_repeat.update_layout(height=400, showlegend=False)
     fig_repeat.update_traces(textposition="outside")
     st.plotly_chart(fig_repeat, use_container_width=True)
+
+st.markdown("---")
+
+# ── Row 1b: Box Plot — Full CLV Range Including Top 5% ───────────────────────
+st.subheader("Full CLV Range (Including Top 5% Outliers)")
+st.caption("The box shows the median and interquartile range (middle 50%). "
+           "Individual dots on the right represent the high-value customers "
+           "excluded from the histogram above.")
+
+all_positive = user_orders[user_orders["total_revenue"] > 0].copy()
+fig_box = px.box(
+    all_positive, x="loyalty_status", y="total_revenue",
+    color="loyalty_status", points="outliers",
+    template="plotly_dark", color_discrete_map=LOYALTY_COLORS,
+    labels={"total_revenue": "Customer Lifetime Value ($)", "loyalty_status": ""}
+)
+fig_box.update_layout(height=400, showlegend=False)
+st.plotly_chart(fig_box, use_container_width=True)
 
 st.markdown("---")
 

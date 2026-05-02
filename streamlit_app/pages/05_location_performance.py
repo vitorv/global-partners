@@ -50,31 +50,33 @@ col3.metric("Avg Retention Rate", f"{loc_agg['retention_rate'].mean():.1f}%")
 
 st.markdown("---")
 
-# ── Row 1: Leaderboard + Scatter ─────────────────────────────────────────────
-col_a, col_b = st.columns([2, 1])
+# ── Row 1: Revenue Leaderboard ────────────────────────────────────────────────
+st.subheader("Location Revenue Leaderboard")
+fig_bar = px.bar(
+    loc_agg, x="total_revenue", y="location_label", orientation="h",
+    template="plotly_dark", color="total_revenue",
+    color_continuous_scale="Blues"
+)
+fig_bar.update_layout(height=600, yaxis={"categoryorder": "total ascending"})
+st.plotly_chart(fig_bar, use_container_width=True)
 
-with col_a:
-    st.subheader("Location Revenue Leaderboard")
-    fig_bar = px.bar(
-        loc_agg, x="total_revenue", y="location_label", orientation="h",
-        template="plotly_dark", color="total_revenue",
-        color_continuous_scale="Blues"
-    )
-    fig_bar.update_layout(height=600, yaxis={"categoryorder": "total ascending"})
-    st.plotly_chart(fig_bar, use_container_width=True)
+st.markdown("---")
 
-with col_b:
-    st.subheader("Volume vs AOV")
-    fig_scatter = px.scatter(
-        loc_agg, x="total_orders", y="avg_order_value",
-        size="total_revenue", hover_name="location_label",
-        color="retention_rate", template="plotly_dark",
-        color_continuous_scale="Greens",
-        labels={"total_orders": "Total Orders", "avg_order_value": "AOV ($)",
-                "retention_rate": "Retention %"}
-    )
-    fig_scatter.update_layout(height=600)
-    st.plotly_chart(fig_scatter, use_container_width=True)
+# ── Row 2: Volume vs Average Order Value ──────────────────────────────────────
+st.subheader("Order Volume vs Average Order Value (AOV)")
+st.caption("Bubble size = total revenue. Color = customer retention rate. "
+           "Hover over a bubble to see the location name.")
+fig_scatter = px.scatter(
+    loc_agg, x="total_orders", y="avg_order_value",
+    size="total_revenue", hover_name="location_label",
+    color="retention_rate", template="plotly_dark",
+    color_continuous_scale="Greens",
+    labels={"total_orders": "Total Orders",
+            "avg_order_value": "Average Order Value ($)",
+            "retention_rate": "Retention %"}
+)
+fig_scatter.update_layout(height=500)
+st.plotly_chart(fig_scatter, use_container_width=True)
 
 st.markdown("---")
 

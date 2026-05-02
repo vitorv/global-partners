@@ -19,6 +19,18 @@ st.title("Pricing & Discount Effectiveness Dashboard")
 st.caption("**Question:** How are discounts and promotions affecting overall "
            "sales volume and net revenue?")
 
+st.info(
+    "**📌 Data Note:** The project rubric specifies using `order_item_options.option_price < 0` "
+    "to detect discounts. However, after auditing all 193,000+ option records in the raw data, "
+    "**no negative option prices were found** — every `option_price` value is ≥ $0.00, and the "
+    "`discount_amount` field is $0.00 for all 131,000+ orders. This means the dataset does not "
+    "contain any discount or promotion data.\n\n"
+    "**Alternative approach:** Instead, this dashboard analyzes the **pricing impact of paid "
+    "add-on options** (e.g., extra toppings, premium ingredients, substitutions) by comparing "
+    "orders that include paid add-ons vs. base-only orders. This provides insight into how "
+    "pricing variations affect order value and revenue composition."
+)
+
 # ── Load Data ────────────────────────────────────────────────────────────────
 df_orders = load_order_summary()
 

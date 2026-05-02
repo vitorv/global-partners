@@ -61,7 +61,11 @@ with col_a:
         hover_data=["user_id", "recency_days", "loyalty_status"],
         color_discrete_map=SEGMENT_COLORS,
         template="plotly_dark",
-        title="Sample of 2,000 Customers (bubble size = recency)"
+        title="Sample of 2,000 Customers (bubble size = recency)",
+        labels={
+            "frequency": "Frequency (Total Lifetime Orders)",
+            "monetary": "Monetary (Total Lifetime Spend $)"
+        }
     )
     fig_scatter.update_layout(height=450)
     st.plotly_chart(fig_scatter, use_container_width=True)

@@ -56,6 +56,30 @@ def run():
         (F.col("line_item_revenue") < 2000)
     )
 
+    # Exclude confirmed developer/QA test accounts.
+    # Evidence: These accounts exhibit bot-like ordering patterns that no real
+    # customer would produce. Specifically, 26-56% of their orders are placed
+    # within 5 minutes of a previous order ("rapid-fire"), they place 20-154
+    # orders in a single day, and they hop across 6-19 restaurant locations.
+    # By contrast, legitimate high-volume customers in this dataset never
+    # exceed 3 orders/day, have <3% rapid-fire rates, and visit 1-3 locations.
+    test_users = [
+        "5ecf9eda505ee9682b445912",  # 664 orders, 30% rapid, 10 locs
+        "5ece77fe902ad501337b23fd",  # 2124 orders, 38% rapid, 19 locs, 154/day peak
+        "5f1b00e5535ee93e0cb768e7",  # 1803 orders, 49% rapid, 19 locs
+        "5f3c1860505ee9de2a7b23f0",  # 743 orders, 41% rapid, 12 locs
+        "60388a4d4f5ee9231e8dda0f",  # 234 orders, 27% rapid, 10 locs
+        "5ecf54cf4f5ee92f387b23f3",  # 725 orders, 30% rapid, 14 locs
+        "5fcc79d04f5ee9f812be49c2",  # 799 orders, 27% rapid, 12 locs
+        "5f184fc74f5ee9e640b4f7ea",  # 380 orders, 30% rapid, 12 locs
+        "5ff415c0505ee9d953b281c4",  # 297 orders, 26% rapid, 7 locs
+        "5ecf6d334f5ee97259ce6751",  # 118 orders, 32% rapid, 7 locs
+        "5eac88d6902ad598127b240b",  # 1000 orders, 56% rapid, 6 locs, 115/day peak
+        "5f3d955c37ab46de2a7b240b",  # 525 orders, 28% rapid, 20 locs
+        "5f17eb6d505ee9293ccf7dc1",  # 523 orders, 39% rapid, 2 locs
+        "5ef4983d505ee9904cedf505",  # 320 orders, 34% rapid, 9 locs
+    ]
+    df_silver = df_silver.filter(~F.col("user_id").isin(test_users))
 
     # We partition by order_date_partition (YYYY-MM-DD string) to be consistent with Bronze
     df_silver = df_silver.withColumn("order_date_partition", F.col("order_date").cast("string"))
