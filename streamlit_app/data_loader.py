@@ -2,8 +2,17 @@ import pandas as pd
 import streamlit as st
 import os
 
-# Base directory for Gold Parquet files
-BASE_PATH = os.path.join("data", "output", "gold")
+# ── Path resolver: local dev vs AWS production ────────────────────────────────
+# Set PIPELINE_ENV=aws and S3_BUCKET=<bucket-name> in the App Runner environment
+# variables to switch from local Parquet reads to S3 reads.
+# pandas.read_parquet() uses s3fs transparently when given an s3:// path.
+_PIPELINE_ENV = os.environ.get("PIPELINE_ENV", "local")
+_S3_BUCKET = os.environ.get("S3_BUCKET", "")
+
+if _PIPELINE_ENV == "aws":
+    BASE_PATH = f"s3://{_S3_BUCKET}/gold"
+else:
+    BASE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "output", "gold")
 
 @st.cache_data
 def load_dim_restaurant():

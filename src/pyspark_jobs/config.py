@@ -19,7 +19,15 @@ os.environ["PYSPARK_SUBMIT_ARGS"] = '--driver-java-options "--add-opens=java.bas
 # ENVIRONMENT DETECTION
 # Set PIPELINE_ENV=aws in the Glue job parameters to switch to AWS paths.
 # ---------------------------------------------------------------------------
-ENV = os.environ.get("PIPELINE_ENV", "local")  # "local" | "aws"
+# In AWS Glue, parameters are passed via sys.argv as --PARAM_NAME value
+def get_arg_value(arg_name, default_value):
+    if f"--{arg_name}" in sys.argv:
+        idx = sys.argv.index(f"--{arg_name}")
+        if idx + 1 < len(sys.argv):
+            return sys.argv[idx + 1]
+    return os.environ.get(arg_name, default_value)
+
+ENV = get_arg_value("PIPELINE_ENV", "local")  # "local" | "aws"
 
 # ---------------------------------------------------------------------------
 # RDS / SQL SERVER CONNECTION  (Landing → Bronze only)
@@ -73,7 +81,7 @@ LOCAL_PATHS = {
 }
 
 # ── AWS (production) ─────────────────────────────────────────────────────────
-S3_BUCKET = os.environ.get("S3_BUCKET", "global-partners-data-lake")
+S3_BUCKET = get_arg_value("S3_BUCKET", "global-partners-data-lake")
 
 AWS_PATHS = {
     "landing": f"s3://{S3_BUCKET}/landing/",

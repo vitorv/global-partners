@@ -1,0 +1,30 @@
+# Local data outputs — not needed in production (app reads from S3)
+data/
+
+# Git history
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Test artifacts
+.pytest_cache/
+tests/
+
+# Pipeline scripts — run on Glue, not in the container
+src/
+
+# JDBC JAR — not needed in container
+*.jar
+
+# Docs
+docs/
+
+# Dev files
+*.md
+upload_to_rds.py
