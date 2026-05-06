@@ -1,0 +1,39 @@
+{
+  "family": "global-partners-streamlit",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::561764228129:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::561764228129:role/AppRunnerInstanceRole",
+  "containerDefinitions": [
+    {
+      "name": "streamlit",
+      "image": "561764228129.dkr.ecr.us-east-2.amazonaws.com/global-partners-streamlit:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8501,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {"name": "PIPELINE_ENV",                       "value": "aws"},
+        {"name": "S3_BUCKET",                          "value": "global-partners-data-lake-561764228129"},
+        {"name": "AWS_DEFAULT_REGION",                 "value": "us-east-1"},
+        {"name": "STREAMLIT_SERVER_ENABLE_CORS",       "value": "false"},
+        {"name": "STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION", "value": "false"},
+        {"name": "STREAMLIT_SERVER_HEADLESS",          "value": "true"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group":         "/ecs/global-partners-streamlit",
+          "awslogs-region":        "us-east-2",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group":  "true"
+        }
+      }
+    }
+  ]
+}

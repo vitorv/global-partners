@@ -13,7 +13,7 @@ COPY requirements.txt .
 # Skip PySpark and pyodbc — not needed in the dashboard container (pipeline runs on Glue)
 RUN pip install --no-cache-dir \
     pandas==2.2.2 \
-    streamlit>=1.36.0 \
+    streamlit==1.36.0 \
     plotly==5.22.0 \
     boto3==1.34.107 \
     "s3fs>=2024.2.0" \
@@ -31,11 +31,4 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
     CMD curl --fail http://localhost:8501/_stcore/health || exit 1
 
 CMD python -c "import pandas as pd; print('TESTING S3...'); df = pd.read_parquet('s3://global-partners-data-lake-561764228129/gold/dim_restaurant', storage_options={'client_kwargs': {'region_name': 'us-east-1'}}); print('SUCCESS! ROWS:', len(df))" && \
-    streamlit run app.py \
-    --server.port=8501 \
-    --server.address=0.0.0.0 \
-    --server.headless=true \
-    --browser.gatherUsageStats=false \
-    --server.enableCORS=false \
-    --server.enableWebsocketCompression=false \
-    --server.enableXsrfProtection=false
+    streamlit run app.py
