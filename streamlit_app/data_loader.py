@@ -16,18 +16,21 @@ else:
     BASE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "output", "gold")
     S3_OPTS = None
 
+@st.cache_data
 def load_dim_restaurant():
     df = pd.read_parquet(os.path.join(BASE_PATH, "dim_restaurant"), storage_options=S3_OPTS)
     # Create a clean label "Alltown Fresh (#abc123)"
     df["location_label"] = df["app_name"] + " (#" + df["restaurant_id"].str[-6:] + ")"
     return df
 
+@st.cache_data
 def load_dim_customer():
     df = pd.read_parquet(os.path.join(BASE_PATH, "dim_customer"), storage_options=S3_OPTS)
     df["first_order_date"] = pd.to_datetime(df["first_order_date"])
     df["last_order_date"] = pd.to_datetime(df["last_order_date"])
     return df
 
+@st.cache_data
 def load_order_summary():
     df = pd.read_parquet(os.path.join(BASE_PATH, "fct_order_summary"), storage_options=S3_OPTS)
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
@@ -37,6 +40,7 @@ def load_order_summary():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return df
 
+@st.cache_data
 def load_daily_sales():
     df = pd.read_parquet(os.path.join(BASE_PATH, "fct_daily_sales_summary"), storage_options=S3_OPTS)
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
@@ -46,6 +50,7 @@ def load_daily_sales():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return df
 
+@st.cache_data
 def load_customer_daily():
     df = pd.read_parquet(os.path.join(BASE_PATH, "fct_customer_daily_snapshot"), storage_options=S3_OPTS)
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
@@ -55,11 +60,13 @@ def load_customer_daily():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return df
 
+@st.cache_data
 def load_customer_rfm():
     df = pd.read_parquet(os.path.join(BASE_PATH, "fct_customer_rfm"), storage_options=S3_OPTS)
     df["monetary"] = pd.to_numeric(df["monetary"], errors="coerce").fillna(0.0)
     return df
 
+@st.cache_data
 def load_dim_date():
     df = pd.read_parquet(os.path.join(BASE_PATH, "dim_date"), storage_options=S3_OPTS)
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))

@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 # Load custom CSS
-with open("streamlit_app/style.css") as f:
+with open("style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Use the new multipage navigation API (Streamlit >= 1.36.0)
