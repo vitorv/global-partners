@@ -29,11 +29,12 @@ EXPOSE 8501
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
     CMD curl --fail http://localhost:8501/_stcore/health || exit 1
 
-ENTRYPOINT ["streamlit", "run", "streamlit_app/app.py", \
-            "--server.port=8501", \
-            "--server.address=0.0.0.0", \
-            "--server.headless=true", \
-            "--browser.gatherUsageStats=false", \
-            "--server.enableCORS=false", \
-            "--server.enableWebsocketCompression=false", \
-            "--server.enableXsrfProtection=false"]
+CMD python -c "import pandas as pd; print('TESTING S3...'); df = pd.read_parquet('s3://global-partners-data-lake-561764228129/gold/dim_restaurant', storage_options={'client_kwargs': {'region_name': 'us-east-1'}}); print('SUCCESS! ROWS:', len(df))" && \
+    streamlit run streamlit_app/app.py \
+    --server.port=8501 \
+    --server.address=0.0.0.0 \
+    --server.headless=true \
+    --browser.gatherUsageStats=false \
+    --server.enableCORS=false \
+    --server.enableWebsocketCompression=false \
+    --server.enableXsrfProtection=false
