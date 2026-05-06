@@ -35,4 +35,5 @@ ENTRYPOINT ["streamlit", "run", "streamlit_app/app.py", \
             "--server.headless=true", \
             "--browser.gatherUsageStats=false", \
             "--server.enableCORS=false", \
-            "--server.enableWebsocketCompression=false"]
+            "--server.enableWebsocketCompression=false", \
+            "--server.enableXsrfProtection=false"]
