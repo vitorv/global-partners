@@ -1,0 +1,16 @@
+{
+    "ImageRepository": {
+        "ImageIdentifier": "561764228129.dkr.ecr.us-east-2.amazonaws.com/global-partners-streamlit:latest",
+        "ImageConfiguration": {
+            "Port": "8501",
+            "RuntimeEnvironmentVariables": {
+                "PIPELINE_ENV": "aws",
+                "S3_BUCKET": "global-partners-data-lake-561764228129"
+            }
+        },
+        "ImageRepositoryType": "ECR"
+    },
+    "AuthenticationConfiguration": {
+        "AccessRoleArn": "arn:aws:iam::561764228129:role/AppRunnerECRAccessRole"
+    }
+}
