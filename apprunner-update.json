@@ -5,7 +5,8 @@
             "Port": "8501",
             "RuntimeEnvironmentVariables": {
                 "PIPELINE_ENV": "aws",
-                "S3_BUCKET": "global-partners-data-lake-561764228129"
+                "S3_BUCKET": "global-partners-data-lake-561764228129",
+                "AWS_DEFAULT_REGION": "us-east-1"
             }
         },
         "ImageRepositoryType": "ECR"
