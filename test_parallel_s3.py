@@ -1,4 +1,5 @@
 import boto3
+from botocore.config import Config
 from urllib.parse import urlparse
 import os
 import time
@@ -9,7 +10,9 @@ parsed = urlparse(full_path)
 bucket = parsed.netloc
 prefix = parsed.path.lstrip('/')
 
-s3 = boto3.client('s3', region_name='us-east-1')
+config = Config(max_pool_connections=50)
+s3 = boto3.client('s3', region_name='us-east-1', config=config)
+
 paginator = s3.get_paginator('list_objects_v2')
 
 local_dir = f"C:/tmp/{prefix.replace('/', '_')}"
@@ -30,11 +33,10 @@ def download_key(key):
     local_file = os.path.join(local_dir, relative_path)
     os.makedirs(os.path.dirname(local_file), exist_ok=True)
     if not os.path.exists(local_file):
-        s3 = boto3.client('s3', region_name='us-east-1') # thread-safe client
         s3.download_file(bucket, key, local_file)
 
 start = time.time()
-with ThreadPoolExecutor(max_workers=20) as executor:
-    executor.map(download_key, keys_to_download)
+with ThreadPoolExecutor(max_workers=50) as executor:
+    list(executor.map(download_key, keys_to_download))
 
 print(f"Time taken to download {len(keys_to_download)} files: {time.time() - start:.2f}s")
