@@ -27,6 +27,6 @@ docs/
 
 # Dev files
 *.md
-scripts/
+sensitive_scripts/
 infra/
 scratch/
