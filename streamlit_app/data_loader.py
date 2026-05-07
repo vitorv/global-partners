@@ -16,23 +16,63 @@ else:
     BASE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "output", "gold")
     S3_OPTS = None
 
-@st.cache_data(ttl=3600, show_spinner=False)
+def _safe_read_parquet(path_suffix):
+    """
+    Downloads parquet files from S3 to a local temp directory and reads them.
+    This avoids the massive OOM memory leak in s3fs.
+    """
+    full_path = os.path.join(BASE_PATH, path_suffix).replace('\\', '/')
+    
+    if not full_path.startswith("s3://"):
+        return pd.read_parquet(full_path)
+    
+    import boto3
+    from urllib.parse import urlparse
+    import tempfile
+    
+    parsed = urlparse(full_path)
+    bucket = parsed.netloc
+    prefix = parsed.path.lstrip('/')
+    
+    s3 = boto3.client('s3', region_name='us-east-1')
+    paginator = s3.get_paginator('list_objects_v2')
+    
+    local_dir = f"/tmp/{prefix.replace('/', '_')}"
+    os.makedirs(local_dir, exist_ok=True)
+    
+    downloaded = False
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        if 'Contents' in page:
+            for obj in page['Contents']:
+                key = obj['Key']
+                if key.endswith('.parquet'):
+                    local_file = os.path.join(local_dir, os.path.basename(key))
+                    if not os.path.exists(local_file):
+                        s3.download_file(bucket, key, local_file)
+                    downloaded = True
+                    
+    if not downloaded:
+        raise FileNotFoundError(f"No parquet files found in {full_path}")
+        
+    return pd.read_parquet(local_dir)
+
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_dim_restaurant():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "dim_restaurant"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("dim_restaurant")
     # Create a clean label "Alltown Fresh (#abc123)"
     df["location_label"] = df["app_name"] + " (#" + df["restaurant_id"].str[-6:] + ")"
     return df
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_dim_customer():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "dim_customer"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("dim_customer")
     df["first_order_date"] = pd.to_datetime(df["first_order_date"])
     df["last_order_date"] = pd.to_datetime(df["last_order_date"])
     return df
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_order_summary():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "fct_order_summary"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("fct_order_summary")
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
     
     # Cast Decimal objects to float
@@ -40,9 +80,9 @@ def load_order_summary():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return df
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_daily_sales():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "fct_daily_sales_summary"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("fct_daily_sales_summary")
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
     
     # Cast Decimal objects to float
@@ -50,9 +90,9 @@ def load_daily_sales():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return df
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_customer_daily():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "fct_customer_daily_snapshot"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("fct_customer_daily_snapshot")
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
     
     # Cast Decimal objects to float
@@ -60,14 +100,14 @@ def load_customer_daily():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return df
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_customer_rfm():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "fct_customer_rfm"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("fct_customer_rfm")
     df["monetary"] = pd.to_numeric(df["monetary"], errors="coerce").fillna(0.0)
     return df
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_resource(ttl=3600, show_spinner=False)
 def load_dim_date():
-    df = pd.read_parquet(os.path.join(BASE_PATH, "dim_date"), storage_options=S3_OPTS)
+    df = _safe_read_parquet("dim_date")
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
     return df

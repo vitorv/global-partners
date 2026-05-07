@@ -2,8 +2,8 @@
   "family": "global-partners-streamlit",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024",
+  "cpu": "2048",
+  "memory": "8192",
   "executionRoleArn": "arn:aws:iam::561764228129:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::561764228129:role/AppRunnerInstanceRole",
   "containerDefinitions": [
