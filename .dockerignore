@@ -27,4 +27,6 @@ docs/
 
 # Dev files
 *.md
-upload_to_rds.py
+scripts/
+infra/
+scratch/
