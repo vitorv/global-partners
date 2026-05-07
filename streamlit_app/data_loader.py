@@ -16,7 +16,7 @@ else:
     BASE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "output", "gold")
     S3_OPTS = None
 
-def _safe_read_parquet(path_suffix):
+def _safe_read_parquet(path_suffix, **kwargs):
     """
     Downloads parquet files from S3 to a local temp directory and reads them.
     This avoids the massive OOM memory leak in s3fs.
@@ -24,7 +24,7 @@ def _safe_read_parquet(path_suffix):
     full_path = os.path.join(BASE_PATH, path_suffix).replace('\\', '/')
     
     if not full_path.startswith("s3://"):
-        return pd.read_parquet(full_path)
+        return pd.read_parquet(full_path, **kwargs)
     
     import boto3
     from urllib.parse import urlparse
@@ -46,7 +46,10 @@ def _safe_read_parquet(path_suffix):
             for obj in page['Contents']:
                 key = obj['Key']
                 if key.endswith('.parquet'):
-                    local_file = os.path.join(local_dir, os.path.basename(key))
+                    relative_path = key[len(prefix):].lstrip('/')
+                    local_file = os.path.join(local_dir, relative_path)
+                    os.makedirs(os.path.dirname(local_file), exist_ok=True)
+                    
                     if not os.path.exists(local_file):
                         s3.download_file(bucket, key, local_file)
                     downloaded = True
@@ -54,7 +57,7 @@ def _safe_read_parquet(path_suffix):
     if not downloaded:
         raise FileNotFoundError(f"No parquet files found in {full_path}")
         
-    return pd.read_parquet(local_dir)
+    return pd.read_parquet(local_dir, **kwargs)
 
 @st.cache_resource(ttl=3600, show_spinner=False)
 def load_dim_restaurant():
@@ -92,7 +95,12 @@ def load_daily_sales():
 
 @st.cache_resource(ttl=3600, show_spinner=False)
 def load_customer_daily():
-    df = _safe_read_parquet("fct_customer_daily_snapshot")
+    # Only load dates first to find the max, avoiding a massive 8GB memory spike
+    df_dates = _safe_read_parquet("fct_customer_daily_snapshot", columns=["date_key"])
+    latest_date = df_dates["date_key"].max()
+    
+    # Read only the latest snapshot day using PyArrow push-down filters
+    df = _safe_read_parquet("fct_customer_daily_snapshot", filters=[("date_key", "==", latest_date)])
     df["date_key"] = pd.to_datetime(df["date_key"].astype(str))
     
     # Cast Decimal objects to float
